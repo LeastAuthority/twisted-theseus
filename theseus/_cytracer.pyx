@@ -51,6 +51,11 @@ cdef int theseus_tracefunc(PyObject *_self, PyFrameObject *_frame, int event, Py
     if _frame.f_code.co_flags & CO_GENERATOR:
         return 0
 
+    # When the interpreter is busy shutting down it's hard to do anything
+    # coherent.  Hopefully we're also not missing anything terribly important.
+    if defer.Deferred is None:
+        return 0
+
     # If it's not a deferred, we don't care either.
     if not isinstance(arg, defer.Deferred):
         return 0
